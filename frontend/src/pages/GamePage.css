@@ -1,0 +1,52 @@
+.game-page {
+  width: 100%;
+  max-width: 600px;
+  padding: 20px;
+}
+
+.game-page.loading,
+.game-page.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.game-container {
+  background: white;
+  border-radius: 16px;
+  padding: 40px 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  color: #333;
+}
+
+.game-container h1 {
+  margin: 0 0 20px 0;
+  text-align: center;
+  color: #667eea;
+  font-size: 2.5em;
+}
+
+.difficulty-badge {
+  text-align: center;
+  background: #f0f0f0;
+  padding: 8px 16px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #764ba2;
+}
+
+.game-page.error {
+  color: #d32f2f;
+  text-align: center;
+}
+
+.game-page.error button {
+  margin-top: 20px;
+  background-color: #667eea;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+}

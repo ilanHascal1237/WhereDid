@@ -1,0 +1,137 @@
+.game-board {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.hints-section,
+.guesses-section {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+.hints-section h2,
+.guesses-section h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+.hints-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hint-item {
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+  color: #555;
+  font-size: 0.95em;
+}
+
+.guesses-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.guesses-list li {
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  text-align: center;
+  color: #666;
+}
+
+.guess-form {
+  display: flex;
+  gap: 10px;
+}
+
+.guess-input {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1em;
+  transition: border-color 0.3s;
+}
+
+.guess-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.guess-button {
+  padding: 12px 24px;
+  background-color: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.guess-button:hover {
+  background-color: #764ba2;
+}
+
+.guess-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.status-message {
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  animation: slideIn 0.3s ease-in-out;
+}
+
+.status-message.won {
+  background: #e8f5e9;
+  border: 2px solid #4caf50;
+  color: #2e7d32;
+}
+
+.status-message.lost {
+  background: #ffebee;
+  border: 2px solid #f44336;
+  color: #c62828;
+}
+
+.status-message h2 {
+  margin: 0 0 10px 0;
+}
+
+.status-message p {
+  margin: 0 0 15px 0;
+}
+
+.status-message button {
+  background-color: #667eea;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
