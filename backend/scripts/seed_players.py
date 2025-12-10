@@ -25,18 +25,6 @@ from pymongo.errors import PyMongoError
 # to guess it.
 sample_players = [
     {
-        "name": "LeBron James",
-        "team": "LAL",
-        "position": "SF",
-        "league": "NBA",
-        "jersey_number": 6,
-        "draft_year": 2003,
-        "image_url": "",
-        "height": "6 ft 9 in",
-        "weight": 250,
-        "college": None
-    },
-    {
         "name": "Stephen Curry",
         "team": "GSW",
         "position": "PG",
@@ -47,18 +35,6 @@ sample_players = [
         "height": "6 ft 2 in",
         "weight": 190,
         "college": "Davidson"
-    },
-    {
-        "name": "Giannis Antetokounmpo",
-        "team": "MIL",
-        "position": "PF",
-        "league": "NBA",
-        "jersey_number": 34,
-        "draft_year": 2013,
-        "image_url": "",
-        "height": "6 ft 11 in",
-        "weight": 242,
-        "college": None
     },
     {
         "name": "Patrick Mahomes",
@@ -83,18 +59,6 @@ sample_players = [
         "height": "6 ft 3 in",
         "weight": 247,
         "college": "Alabama"
-    },
-    {
-        "name": "Luka Doncic",
-        "team": "DAL",
-        "position": "PG",
-        "league": "NBA",
-        "jersey_number": 77,
-        "draft_year": 2018,
-        "image_url": "",
-        "height": "6 ft 7 in",
-        "weight": 230,
-        "college": None
     },
     {
         "name": "Kevin Durant",
