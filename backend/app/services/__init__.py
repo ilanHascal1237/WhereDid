@@ -79,31 +79,59 @@ class GameService:
         
         if not player:
             return []
-        
-        hints = []
-        
+        # Prefer college-focused hints: colors, conference, mascot (in that order)
+        # Field names used in player documents (seeded) are:
+        #   - college_colors
+        #   - college_conference
+        #   - college_mascot
+        # If those fields are missing, gracefully fall back to older player info.
+
+        colors = player.get("college_colors") or player.get("colors") or None
+        conference = player.get("college_conference") or player.get("conference") or None
+        mascot = player.get("college_mascot") or player.get("mascot") or None
+
+        # Friendly label construction with fallbacks
+        color_hint = f"College Colors: {colors}" if colors else None
+        conference_hint = f"Conference: {conference}" if conference else None
+        mascot_hint = f"Mascot: {mascot}" if mascot else None
+
+        # Build ordered list (colors -> conference -> mascot)
+        ordered = [h for h in [color_hint, conference_hint, mascot_hint] if h]
+
+        # Difficulty controls how many hints to reveal: easy=3, medium=2, hard=1
         if difficulty == "easy":
-            hints = [
-                f"League: {player['league']}",
-                f"Team: {player['team']}",
-                f"Position: {player['position']}",
-                f"Jersey Number: {player['jersey_number']}",
-                f"Draft Year: {player['draft_year']}"
-            ]
+            take = 3
         elif difficulty == "medium":
-            hints = [
-                f"League: {player['league']}",
-                f"Team: {player['team']}",
-                f"Position: {player['position']}",
-                f"Draft Year: {player['draft_year']}"
-            ]
-        else:  # hard
-            hints = [
-                f"League: {player['league']}",
-                f"Team: {player['team']}",
-                f"Position: {player['position']}"
-            ]
-        
+            take = 2
+        else:
+            take = 1
+
+        hints = ordered[:take]
+
+        # If no college-specific metadata is available, fall back to safer,
+        # non-sensitive hints. Do NOT include team, position, league, jersey
+        # number, height, or weight per request.
+        if not hints:
+            draft = player.get('draft_year')
+            image_available = 'Yes' if player.get('image_url') else 'No'
+            college_meta_available = 'Yes' if (player.get('college_colors') or player.get('college_conference') or player.get('college_mascot')) else 'No'
+
+            # Build fallback candidates (draft year, image availability, college metadata flag)
+            fallback_candidates = []
+            if draft:
+                fallback_candidates.append(f"Draft Year: {draft}")
+            fallback_candidates.append(f"Image Available: {image_available}")
+            fallback_candidates.append(f"College Metadata Present: {college_meta_available}")
+
+            if difficulty == "easy":
+                take = 3
+            elif difficulty == "medium":
+                take = 2
+            else:
+                take = 1
+
+            hints = fallback_candidates[:take]
+
         return hints
 
     @staticmethod

@@ -14,14 +14,13 @@ async def get_daily_challenge(date: str = None):
         # Always generate the next challenge (rotate to next player)
         challenge = GameService.get_daily_challenge(date)
         player = challenge.get("player", {})
-        # Only expose minimal public fields: id, name, and team.
+        # Only expose minimal public fields: id and name.
         # The college is intentionally omitted so the client must guess it.
         return {
             "date": challenge["date"],
             "player": {
                 "id": str(player.get("_id")) if player.get("_id") is not None else None,
                 "name": player.get("name"),
-                "team": player.get("team"),
             },
             "difficulty": challenge["difficulty"]
         }
@@ -45,24 +44,19 @@ async def submit_guess(guess: GameGuess):
 
         if is_correct:
             # Map DB player document to Player model expected by GuessResponse
-            player_obj = Player(
-                id=str(player.get("_id")) if player.get("_id") is not None else None,
-                name=player.get("name"),
-                team=player.get("team"),
-                position=player.get("position"),
-                league=player.get("league"),
-                jersey_number=player.get("jersey_number"),
-                draft_year=player.get("draft_year"),
-                image_url=player.get("image_url"),
-                height=player.get("height"),
-                weight=player.get("weight"),
-                college=player.get("college")
-            )
+            # Build a minimal player payload (use camelCase keys expected by frontend)
+            player_payload = {
+                "id": str(player.get("_id")) if player.get("_id") is not None else None,
+                "name": player.get("name"),
+                "draftYear": player.get("draft_year"),
+                "imageUrl": player.get("image_url"),
+                "college": player.get("college")
+            }
 
             return GuessResponse(
                 correct=True,
                 message="Correct! You got it!",
-                player=player_obj
+                player=player_payload
             )
         else:
             return GuessResponse(

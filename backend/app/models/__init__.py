@@ -5,14 +5,8 @@ from datetime import datetime
 class Player(BaseModel):
     id: str
     name: str
-    team: str
-    position: str
-    league: str  # "NBA" or "NFL"
-    jersey_number: int
     draft_year: int
     image_url: Optional[str] = None
-    height: Optional[str] = None
-    weight: Optional[int] = None
     college: Optional[str] = None
 
     class Config:
@@ -32,4 +26,5 @@ class GameGuess(BaseModel):
 class GuessResponse(BaseModel):
     correct: bool
     message: str
-    player: Optional[Player] = None
+    # Return a plain dict for the player payload so routes can control casing and fields.
+    player: Optional[dict] = None

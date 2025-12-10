@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { GameState } from '../types'
+import { gameService } from '../services/gameService'
 import './GameBoard.css'
 
 interface GameBoardProps {
@@ -18,6 +19,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
   const [inputValue, setInputValue] = useState('')
   // Hints hidden by default per game rules
   const [showHints, setShowHints] = useState(false)
+  const [displayedHints, setDisplayedHints] = useState<string[]>(gameState.hints)
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [suggestionsVisible, setSuggestionsVisible] = useState(false)
 
@@ -68,14 +70,32 @@ const GameBoard: React.FC<GameBoardProps> = ({
     setSuggestionsVisible(false)
   }
 
+  // Keep displayedHints in sync when gameState.hints changes (initial load)
+  useEffect(() => {
+    setDisplayedHints(gameState.hints)
+  }, [gameState.hints])
+
+  const toggleHints = async () => {
+    // If turning hints on, fetch the full set (easy) so user sees all three college hints
+    if (!showHints) {
+      try {
+        if (gameState.currentPlayer?.id) {
+          const hints = await gameService.getHints(gameState.currentPlayer.id, 'easy')
+          setDisplayedHints(hints)
+        }
+      } catch (err) {
+        console.error('Error fetching hints:', err)
+      }
+    }
+    setShowHints((s) => !s)
+  }
+
   return (
     <div className="game-board">
-      {/* Player display: show only name and (optionally) team */}
+      {/* Player display: show only name (team removed) */}
       <div className="player-card">
         <h2 className="player-name">{gameState.currentPlayer?.name}</h2>
-        {gameState.currentPlayer?.team && (
-          <p className="player-team">{gameState.currentPlayer.team}</p>
-        )}
+        {/* team removed from UI per spec */}
       </div>
 
       {/* Hints Section */}
@@ -85,7 +105,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
           <button
             type="button"
             className="toggle-hints-button"
-            onClick={() => setShowHints((s) => !s)}
+            onClick={toggleHints}
             aria-pressed={!showHints}
           >
             {showHints ? 'Hide' : 'Show'}
@@ -94,7 +114,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
 
         {showHints && (
           <div className="hints-list">
-            {gameState.hints.map((hint, index) => (
+            {displayedHints.map((hint, index) => (
               <div key={index} className="hint-item">
                 {hint}
               </div>

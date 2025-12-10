@@ -9,18 +9,16 @@ async def search_players(q: str):
     """Search for players by name"""
     try:
         players_collection = get_players_collection()
+        # Only return minimal public fields (id + name). Do not expose team/position/league/jersey/height/weight.
         results = list(players_collection.find(
             {"name": {"$regex": q, "$options": "i"}},
-            {"_id": 1, "name": 1, "team": 1, "league": 1, "position": 1}
+            {"_id": 1, "name": 1}
         ).limit(10))
-        
+
         players = [
             {
                 "id": str(p["_id"]),
-                "name": p["name"],
-                "team": p.get("team"),
-                "league": p.get("league"),
-                "position": p.get("position")
+                "name": p["name"]
             }
             for p in results
         ]
@@ -75,16 +73,11 @@ async def get_player(player_id: str):
         # Do NOT return the `college` field here — the game requires the client
         # to guess the college. The DB still stores the college value for checking
         # guesses, but we omit it from the player payload sent to the UI.
+        # Only expose non-sensitive public fields. College is intentionally omitted.
         payload = {
             "id": str(player["_id"]),
             "name": player["name"],
-            "team": player["team"],
-            "position": player["position"],
-            "league": player["league"],
-            "jerseyNumber": player.get("jersey_number"),
             "draftYear": player.get("draft_year"),
-            "height": player.get("height"),
-            "weight": player.get("weight"),
             "imageUrl": player.get("image_url")
         }
 

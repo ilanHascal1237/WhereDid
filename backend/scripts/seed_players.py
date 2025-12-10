@@ -26,147 +26,102 @@ from pymongo.errors import PyMongoError
 sample_players = [
     {
         "name": "Stephen Curry",
-        "team": "GSW",
-        "position": "PG",
-        "league": "NBA",
-        "jersey_number": 30,
         "draft_year": 2009,
         "image_url": "",
-        "height": "6 ft 2 in",
-        "weight": 190,
-        "college": "Davidson"
+        "college": "Davidson",
+        "college_colors": "Red and Black",
+        "college_conference": "Atlantic 10",
+        "college_mascot": "Wildcats"
     },
     {
         "name": "Patrick Mahomes",
-        "team": "KC",
-        "position": "QB",
-        "league": "NFL",
-        "jersey_number": 15,
         "draft_year": 2017,
         "image_url": "",
-        "height": "6 ft 2 in",
-        "weight": 225,
-        "college": "Texas Tech"
+        "college": "Texas Tech",
+        "college_colors": "Red and Black",
+        "college_conference": "Big 12",
+        "college_mascot": "Red Raiders"
     },
     {
         "name": "Derrick Henry",
-        "team": "TEN",
-        "position": "RB",
-        "league": "NFL",
-        "jersey_number": 22,
         "draft_year": 2016,
         "image_url": "",
-        "height": "6 ft 3 in",
-        "weight": 247,
-        "college": "Alabama"
+        "college": "Alabama",
+        "college_colors": "Crimson and White",
+        "college_conference": "SEC",
+        "college_mascot": "Big Al (Elephant)"
     },
     {
         "name": "Kevin Durant",
-        "team": "PHX",
-        "position": "SF",
-        "league": "NBA",
-        "jersey_number": 35,
         "draft_year": 2007,
         "image_url": "",
-        "height": "6 ft 10 in",
-        "weight": 240,
-        "college": "Texas"
+        "college": "Texas",
+        "college_colors": "Burnt Orange and White",
+        "college_conference": "Big 12",
+        "college_mascot": "Longhorns (Bevo)"
     },
     {
         "name": "Kawhi Leonard",
-        "team": "LAC",
-        "position": "SF",
-        "league": "NBA",
-        "jersey_number": 2,
         "draft_year": 2011,
         "image_url": "",
-        "height": "6 ft 7 in",
-        "weight": 225,
-        "college": "San Diego State"
+        "college": "San Diego State",
+        "college_colors": "Red and Black",
+        "college_conference": "Mountain West",
+        "college_mascot": "Aztecs"
     },
     {
         "name": "Joel Embiid",
-        "team": "PHI",
-        "position": "C",
-        "league": "NBA",
-        "jersey_number": 21,
         "draft_year": 2014,
         "image_url": "",
-        "height": "7 ft 0 in",
-        "weight": 280,
-        "college": "Kansas"
+        "college": "Kansas",
+        "college_colors": "Crimson and Blue",
+        "college_conference": "Big 12",
+        "college_mascot": "Jayhawks"
     },
     {
         "name": "Jayson Tatum",
-        "team": "BOS",
-        "position": "SF",
-        "league": "NBA",
-        "jersey_number": 0,
         "draft_year": 2017,
         "image_url": "",
-        "height": "6 ft 8 in",
-        "weight": 210,
-        "college": "Duke"
+        "college": "Duke",
+        "college_colors": "Royal Blue and White",
+        "college_conference": "ACC",
+        "college_mascot": "Blue Devils"
     },
     {
         "name": "Tom Brady",
-        "team": "TB",
-        "position": "QB",
-        "league": "NFL",
-        "jersey_number": 12,
         "draft_year": 2000,
         "image_url": "",
-        "height": "6 ft 4 in",
-        "weight": 225,
-        "college": "Michigan"
+        "college": "Michigan",
+        "college_colors": "Maize and Blue",
+        "college_conference": "Big Ten",
+        "college_mascot": "Wolverines"
     },
     {
         "name": "Aaron Rodgers",
-        "team": "NYJ",
-        "position": "QB",
-        "league": "NFL",
-        "jersey_number": 8,
         "draft_year": 2005,
         "image_url": "",
-        "height": "6 ft 2 in",
-        "weight": 225,
-        "college": "California"
+        "college": "California",
+        "college_colors": "Blue and Gold",
+        "college_conference": "Pac-12",
+        "college_mascot": "Golden Bear"
     },
     {
         "name": "Justin Jefferson",
-        "team": "MIN",
-        "position": "WR",
-        "league": "NFL",
-        "jersey_number": 18,
         "draft_year": 2020,
         "image_url": "",
-        "height": "6 ft 1 in",
-        "weight": 202,
-        "college": "LSU"
+        "college": "LSU",
+        "college_colors": "Purple and Gold",
+        "college_conference": "SEC",
+        "college_mascot": "Mike the Tiger"
     },
     {
         "name": "Saquon Barkley",
-        "team": "PHI",
-        "position": "RB",
-        "league": "NFL",
-        "jersey_number": 26,
         "draft_year": 2018,
         "image_url": "",
-        "height": "6 ft 0 in",
-        "weight": 233,
-        "college": "Penn State"
-    },
-    {
-        "name": "A'ja Wilson",
-        "team": "LAS",
-        "position": "F",
-        "league": "WNBA",
-        "jersey_number": 22,
-        "draft_year": 2018,
-        "image_url": "",
-        "height": "6 ft 4 in",
-        "weight": 195,
-        "college": "South Carolina"
+        "college": "Penn State",
+        "college_colors": "Blue and White",
+        "college_conference": "Big Ten",
+        "college_mascot": "Nittany Lion"
     }
 ]
  
