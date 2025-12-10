@@ -4,8 +4,10 @@ import './GameBoard.css'
 
 interface GameBoardProps {
   gameState: GameState
-  onGuess: (playerName: string) => void
-  onNewGame: () => void
+  // onGuess receives the user's guessed college for the current player
+  onGuess: (guessedCollege: string) => void
+  // onNewGame may accept an optional mode or date string (e.g. 'tomorrow' or '2025-12-10')
+  onNewGame: (mode?: string) => void
 }
 
 const GameBoard: React.FC<GameBoardProps> = ({
@@ -14,6 +16,8 @@ const GameBoard: React.FC<GameBoardProps> = ({
   onNewGame,
 }) => {
   const [inputValue, setInputValue] = useState('')
+  // Hints hidden by default per game rules
+  const [showHints, setShowHints] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,16 +29,37 @@ const GameBoard: React.FC<GameBoardProps> = ({
 
   return (
     <div className="game-board">
+      {/* Player display: show only name and (optionally) team */}
+      <div className="player-card">
+        <h2 className="player-name">{gameState.currentPlayer?.name}</h2>
+        {gameState.currentPlayer?.team && (
+          <p className="player-team">{gameState.currentPlayer.team}</p>
+        )}
+      </div>
+
       {/* Hints Section */}
       <div className="hints-section">
-        <h2>Hints</h2>
-        <div className="hints-list">
-          {gameState.hints.map((hint, index) => (
-            <div key={index} className="hint-item">
-              {hint}
-            </div>
-          ))}
+        <div className="hints-header">
+          <h2>Hints</h2>
+          <button
+            type="button"
+            className="toggle-hints-button"
+            onClick={() => setShowHints((s) => !s)}
+            aria-pressed={!showHints}
+          >
+            {showHints ? 'Hide' : 'Show'}
+          </button>
         </div>
+
+        {showHints && (
+          <div className="hints-list">
+            {gameState.hints.map((hint, index) => (
+              <div key={index} className="hint-item">
+                {hint}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Guesses Section */}
@@ -53,16 +78,22 @@ const GameBoard: React.FC<GameBoardProps> = ({
       {gameState.gameStatus === 'won' && (
         <div className="status-message won">
           <h2>🎉 You got it!</h2>
-          <p>The player was {gameState.currentPlayer?.name}</p>
-          <button onClick={onNewGame}>Play Tomorrow's Challenge</button>
+          <p>
+            {gameState.currentPlayer?.name} went to{' '}
+            <strong>{gameState.currentPlayer?.college || '—'}</strong>
+          </p>
+          <button onClick={() => onNewGame('tomorrow')}>Play Tomorrow's Challenge</button>
         </div>
       )}
 
       {gameState.gameStatus === 'lost' && (
         <div className="status-message lost">
           <h2>Game Over</h2>
-          <p>The player was {gameState.currentPlayer?.name}</p>
-          <button onClick={onNewGame}>Try Tomorrow's Challenge</button>
+          <p>
+            {gameState.currentPlayer?.name} went to{' '}
+            <strong>{gameState.currentPlayer?.college || '—'}</strong>
+          </p>
+          <button onClick={() => onNewGame('tomorrow')}>Try Tomorrow's Challenge</button>
         </div>
       )}
 
@@ -73,7 +104,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Enter player name..."
+            placeholder="Enter college name..."
             className="guess-input"
             disabled={gameState.gameStatus !== 'playing'}
           />

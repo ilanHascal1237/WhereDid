@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { Player, DailyChallenge } from '../types'
 
-const API_BASE_URL = '/api'
+const API_BASE_URL = 'http://127.0.0.1:8000'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -14,8 +14,10 @@ export const gameService = {
   /**
    * Get today's daily challenge player
    */
-  getTodaysChallenge: async (): Promise<DailyChallenge> => {
-    const response = await api.get('/game/daily-challenge')
+  getTodaysChallenge: async (date?: string): Promise<DailyChallenge> => {
+    const response = await api.get('/game/daily-challenge', {
+      params: date ? { date } : {},
+    })
     return response.data
   },
 
@@ -34,12 +36,12 @@ export const gameService = {
    */
   submitGuess: async (
     playerId: string,
-    guessedPlayerName: string,
+    guessedCollege: string,
     difficulty: string
-  ): Promise<{ correct: boolean; message: string }> => {
+  ): Promise<any> => {
     const response = await api.post('/game/guess', {
       player_id: playerId,
-      guessed_player_name: guessedPlayerName,
+      guessed_college: guessedCollege,
       difficulty,
     })
     return response.data

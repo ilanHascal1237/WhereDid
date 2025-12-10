@@ -1,12 +1,11 @@
 """Seed script for WhereDid players collection.
 
 This script connects using app.db.MongoDB (reads MONGODB_URL from env or uses default)
-and inserts a small sample set of NBA and NFL players, skipping any that already
-exist by exact name match.
+and inserts a sample set of players, skipping any that already exist by exact name match.
 
 Run:
-  cd backend
-  python .\scripts\seed_players.py
+    cd backend
+    python ./scripts/seed_players.py
 """
 
 import sys
@@ -15,12 +14,15 @@ from pathlib import Path
 # Ensure the `backend` directory is on sys.path so `app` package imports work
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+        sys.path.insert(0, str(ROOT))
 
 from app.db import MongoDB, get_players_collection
 from pymongo.errors import PyMongoError
-import sys
 
+# Expanded sample players. Seed includes accurate `college` values (or None when
+# the player did not attend college). The routes are configured to omit the
+# `college` field in the public player payload so the UI must prompt the user
+# to guess it.
 sample_players = [
     {
         "name": "LeBron James",
@@ -32,7 +34,7 @@ sample_players = [
         "image_url": "",
         "height": "6 ft 9 in",
         "weight": 250,
-        "college": "St. Vincent–St. Mary"
+        "college": None
     },
     {
         "name": "Stephen Curry",
@@ -56,7 +58,7 @@ sample_players = [
         "image_url": "",
         "height": "6 ft 11 in",
         "weight": 242,
-        "college": "N/A"
+        "college": None
     },
     {
         "name": "Patrick Mahomes",
@@ -81,8 +83,129 @@ sample_players = [
         "height": "6 ft 3 in",
         "weight": 247,
         "college": "Alabama"
+    },
+    {
+        "name": "Luka Doncic",
+        "team": "DAL",
+        "position": "PG",
+        "league": "NBA",
+        "jersey_number": 77,
+        "draft_year": 2018,
+        "image_url": "",
+        "height": "6 ft 7 in",
+        "weight": 230,
+        "college": None
+    },
+    {
+        "name": "Kevin Durant",
+        "team": "PHX",
+        "position": "SF",
+        "league": "NBA",
+        "jersey_number": 35,
+        "draft_year": 2007,
+        "image_url": "",
+        "height": "6 ft 10 in",
+        "weight": 240,
+        "college": "Texas"
+    },
+    {
+        "name": "Kawhi Leonard",
+        "team": "LAC",
+        "position": "SF",
+        "league": "NBA",
+        "jersey_number": 2,
+        "draft_year": 2011,
+        "image_url": "",
+        "height": "6 ft 7 in",
+        "weight": 225,
+        "college": "San Diego State"
+    },
+    {
+        "name": "Joel Embiid",
+        "team": "PHI",
+        "position": "C",
+        "league": "NBA",
+        "jersey_number": 21,
+        "draft_year": 2014,
+        "image_url": "",
+        "height": "7 ft 0 in",
+        "weight": 280,
+        "college": "Kansas"
+    },
+    {
+        "name": "Jayson Tatum",
+        "team": "BOS",
+        "position": "SF",
+        "league": "NBA",
+        "jersey_number": 0,
+        "draft_year": 2017,
+        "image_url": "",
+        "height": "6 ft 8 in",
+        "weight": 210,
+        "college": "Duke"
+    },
+    {
+        "name": "Tom Brady",
+        "team": "TB",
+        "position": "QB",
+        "league": "NFL",
+        "jersey_number": 12,
+        "draft_year": 2000,
+        "image_url": "",
+        "height": "6 ft 4 in",
+        "weight": 225,
+        "college": "Michigan"
+    },
+    {
+        "name": "Aaron Rodgers",
+        "team": "NYJ",
+        "position": "QB",
+        "league": "NFL",
+        "jersey_number": 8,
+        "draft_year": 2005,
+        "image_url": "",
+        "height": "6 ft 2 in",
+        "weight": 225,
+        "college": "California"
+    },
+    {
+        "name": "Justin Jefferson",
+        "team": "MIN",
+        "position": "WR",
+        "league": "NFL",
+        "jersey_number": 18,
+        "draft_year": 2020,
+        "image_url": "",
+        "height": "6 ft 1 in",
+        "weight": 202,
+        "college": "LSU"
+    },
+    {
+        "name": "Saquon Barkley",
+        "team": "PHI",
+        "position": "RB",
+        "league": "NFL",
+        "jersey_number": 26,
+        "draft_year": 2018,
+        "image_url": "",
+        "height": "6 ft 0 in",
+        "weight": 233,
+        "college": "Penn State"
+    },
+    {
+        "name": "A'ja Wilson",
+        "team": "LAS",
+        "position": "F",
+        "league": "WNBA",
+        "jersey_number": 22,
+        "draft_year": 2018,
+        "image_url": "",
+        "height": "6 ft 4 in",
+        "weight": 195,
+        "college": "South Carolina"
     }
 ]
+ 
 
 
 def seed():

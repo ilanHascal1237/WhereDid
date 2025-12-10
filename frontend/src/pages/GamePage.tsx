@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { gameService } from '../services/gameService'
-import { Player, GameState } from '../types'
+import { GameState } from '../types'
 import GameBoard from '../components/GameBoard'
 import './GamePage.css'
 
@@ -19,14 +19,33 @@ const GamePage: React.FC = () => {
     loadDailyChallenge()
   }, [])
 
-  const loadDailyChallenge = async () => {
+  /**
+   * Load a daily challenge. If `dateOrMode` is 'tomorrow', compute tomorrow's
+   * date (YYYY-MM-DD). Otherwise, if a date string is provided, use it.
+   */
+  const loadDailyChallenge = async (dateOrMode?: string) => {
     try {
       setLoading(true)
-      const challenge = await gameService.getTodaysChallenge()
+
+      let targetDate: string | undefined = undefined
+      if (dateOrMode === 'tomorrow') {
+        const d = new Date()
+        d.setDate(d.getDate() + 1)
+        const yyyy = d.getFullYear()
+        const mm = String(d.getMonth() + 1).padStart(2, '0')
+        const dd = String(d.getDate()).padStart(2, '0')
+        targetDate = `${yyyy}-${mm}-${dd}`
+      } else if (dateOrMode) {
+        targetDate = dateOrMode
+      }
+
+      const challenge = await gameService.getTodaysChallenge(targetDate)
       setGameState((prev) => ({
         ...prev,
         currentPlayer: challenge.player,
         difficulty: challenge.difficulty,
+        guesses: [],
+        gameStatus: 'playing',
       }))
       // Load initial hints
       const hints = await gameService.getHints(
@@ -38,32 +57,34 @@ const GamePage: React.FC = () => {
         hints,
       }))
     } catch (err) {
-      setError('Failed to load today\'s challenge. Please try again.')
+      setError("Failed to load today's challenge. Please try again.")
       console.error(err)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleGuess = async (playerName: string) => {
+  const handleGuess = async (guessedCollege: string) => {
     if (!gameState.currentPlayer) return
 
     try {
       const result = await gameService.submitGuess(
         gameState.currentPlayer.id,
-        playerName,
+        guessedCollege,
         gameState.difficulty
       )
 
       if (result.correct) {
+        // Update currentPlayer with returned player (includes college) so UI can reveal it
         setGameState((prev) => ({
           ...prev,
+          currentPlayer: result.player || prev.currentPlayer,
           gameStatus: 'won',
         }))
       } else {
         setGameState((prev) => ({
           ...prev,
-          guesses: [...prev.guesses, playerName],
+          guesses: [...prev.guesses, guessedCollege],
         }))
       }
     } catch (err) {
@@ -79,7 +100,7 @@ const GamePage: React.FC = () => {
     return (
       <div className="game-page error">
         <p>{error}</p>
-        <button onClick={loadDailyChallenge}>Try Again</button>
+        <button onClick={() => loadDailyChallenge()}>Try Again</button>
       </div>
     )
   }

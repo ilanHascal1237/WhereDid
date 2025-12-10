@@ -39,7 +39,10 @@ async def get_player(player_id: str):
         if not player:
             raise HTTPException(status_code=404, detail="Player not found")
         
-        return {
+        # Do NOT return the `college` field here — the game requires the client
+        # to guess the college. The DB still stores the college value for checking
+        # guesses, but we omit it from the player payload sent to the UI.
+        payload = {
             "id": str(player["_id"]),
             "name": player["name"],
             "team": player["team"],
@@ -49,8 +52,9 @@ async def get_player(player_id: str):
             "draftYear": player.get("draft_year"),
             "height": player.get("height"),
             "weight": player.get("weight"),
-            "college": player.get("college"),
             "imageUrl": player.get("image_url")
         }
+
+        return payload
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

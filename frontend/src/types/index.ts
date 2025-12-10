@@ -2,10 +2,12 @@ export interface Player {
   id: string
   name: string
   team: string
-  position: string
-  league: 'NBA' | 'NFL'
-  jerseyNumber: number
-  draftYear: number
+  // The UI only requires name and team; other fields are optional and may be
+  // omitted by the API to avoid revealing the answer (college).
+  position?: string
+  league?: 'NBA' | 'NFL' | string
+  jerseyNumber?: number
+  draftYear?: number
   imageUrl?: string
   height?: string
   weight?: number
