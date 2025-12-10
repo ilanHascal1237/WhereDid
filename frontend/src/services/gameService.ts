@@ -64,4 +64,14 @@ export const gameService = {
     const response = await api.get(`/players/${playerId}`)
     return response.data
   },
+
+  /**
+   * Get college suggestions for type-ahead. Returns { colleges: string[] }
+   */
+  getColleges: async (query: string): Promise<string[]> => {
+    const response = await api.get('/players/colleges', {
+      params: query ? { q: query } : {},
+    })
+    return response.data.colleges || []
+  },
 }

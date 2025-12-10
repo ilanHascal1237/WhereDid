@@ -26,7 +26,7 @@ class DailyChallenge(BaseModel):
 
 class GameGuess(BaseModel):
     player_id: str
-    guessed_player_name: str
+    guessed_college: str
     difficulty: str
 
 class GuessResponse(BaseModel):

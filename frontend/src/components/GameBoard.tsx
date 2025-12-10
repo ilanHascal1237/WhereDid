@@ -18,13 +18,54 @@ const GameBoard: React.FC<GameBoardProps> = ({
   const [inputValue, setInputValue] = useState('')
   // Hints hidden by default per game rules
   const [showHints, setShowHints] = useState(false)
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [suggestionsVisible, setSuggestionsVisible] = useState(false)
+
+  // debounce timer id
+  let debounceTimer: number | undefined
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (inputValue.trim()) {
       onGuess(inputValue)
       setInputValue('')
+      setSuggestions([])
+      setSuggestionsVisible(false)
     }
+  }
+
+  const fetchSuggestions = (q: string) => {
+    // clear any existing timer
+    window.clearTimeout(debounceTimer)
+    // debounce 250ms
+    debounceTimer = window.setTimeout(async () => {
+      if (!q || q.trim().length === 0) {
+        setSuggestions([])
+        setSuggestionsVisible(false)
+        return
+      }
+
+      try {
+        const cols = await (await import('../services/gameService')).gameService.getColleges(q)
+        setSuggestions(cols)
+        setSuggestionsVisible(cols.length > 0)
+      } catch (err) {
+        console.error('Error fetching college suggestions', err)
+        setSuggestions([])
+        setSuggestionsVisible(false)
+      }
+    }, 250)
+  }
+
+  const handleInputChange = (value: string) => {
+    setInputValue(value)
+    fetchSuggestions(value)
+  }
+
+  const handleSuggestionClick = (s: string) => {
+    setInputValue(s)
+    setSuggestions([])
+    setSuggestionsVisible(false)
   }
 
   return (
@@ -100,14 +141,33 @@ const GameBoard: React.FC<GameBoardProps> = ({
       {/* Input Form */}
       {gameState.gameStatus === 'playing' && (
         <form className="guess-form" onSubmit={handleSubmit}>
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Enter college name..."
-            className="guess-input"
-            disabled={gameState.gameStatus !== 'playing'}
-          />
+          <div style={{ position: 'relative', flex: 1 }}>
+            <input
+              type="text"
+              value={inputValue}
+              onChange={(e) => handleInputChange(e.target.value)}
+              placeholder="Enter college name..."
+              className="guess-input"
+              disabled={gameState.gameStatus !== 'playing'}
+              autoComplete="off"
+            />
+            {suggestionsVisible && suggestions.length > 0 && (
+              <div className="suggestions-list" role="listbox">
+                {suggestions.map((s, i) => (
+                  <div
+                    key={i}
+                    role="option"
+                    tabIndex={0}
+                    className="suggestion-item"
+                    onMouseDown={(e) => e.preventDefault()} /* prevent input blur */
+                    onClick={() => handleSuggestionClick(s)}
+                  >
+                    {s}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           <button type="submit" className="guess-button">
             Guess
           </button>
