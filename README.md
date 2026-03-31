@@ -8,9 +8,16 @@ WhereDid is inspired by [Poeltl](https://poeltl.com), a popular NBA player guess
 
 Each day features a new mystery player that users must guess using strategic hints. The game features three difficulty levels to accommodate players of all knowledge levels.
 
+## Screenshots
+
+![Rogers](images/rogers.png)
+
+![Jjettas](images/jjettas.png)
+
 ## Features
 
 ### Core Gameplay
+
 - **Daily Mystery Player**: A new player is featured each day
 - **Multi-League Support**: Players from both NBA and NFL
 - **Multiple Difficulty Modes**:
@@ -20,6 +27,7 @@ Each day features a new mystery player that users must guess using strategic hin
 - **Limited Guesses**: Players have a set number of attempts to guess correctly
 
 ### Planned Enhancements
+
 - Score tracking and statistics
 - Leaderboards
 - Social sharing of results
@@ -51,6 +59,7 @@ Each day features a new mystery player that users must guess using strategic hin
 #### Start MongoDB
 
 Make sure MongoDB is running:
+
 ```bash
 # Local MongoDB (if installed)
 mongod
@@ -61,6 +70,7 @@ mongod
 #### Start Backend
 
 From the `backend` directory:
+
 ```bash
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
@@ -71,6 +81,7 @@ API documentation: `http://localhost:8000/docs`
 #### Start Frontend
 
 From the `frontend` directory:
+
 ```bash
 npm run dev
 ```
@@ -80,12 +91,14 @@ The application will be available at `http://localhost:5173`
 #### Build for Production
 
 **Frontend**:
+
 ```bash
 npm run build
 ```
 
-**Backend**: 
-```bash
+**Backend**:
+
+````bash
 # Run with gunicorn or similar in production
 gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app
 ```tup
@@ -93,18 +106,20 @@ gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app
 1. Navigate to the backend directory:
    ```bash
    cd backend
-   ```
+````
 
 2. Create a virtual environment:
+
    ```bash
    python -m venv venv
    ```
 
 3. Activate the virtual environment:
+
    ```bash
    # On Windows
    venv\Scripts\activate
-   
+
    # On macOS/Linux
    source venv/bin/activate
    ```
@@ -112,9 +127,11 @@ gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app
 4. Install dependencies:
    ```bash
    pip install -r requirements.txt
+   ```
+
 ## Project Structure
 
-```
+````
 WhereDid/
 ├── frontend/                 # React + TypeScript frontend
 │   ├── src/
@@ -147,17 +164,20 @@ WhereDid/
 ```vironment variables:
    ```bash
    cp .env.example .env
-   ```
-   Update `.env` with your MongoDB connection string and other settings.
+````
+
+Update `.env` with your MongoDB connection string and other settings.
 
 #### Frontend Setup
 
 1. Navigate to the frontend directory:
+
    ```bash
    cd frontend
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
@@ -169,7 +189,7 @@ WhereDid/
 
 ### Running the Project
 
-*To be updated*
+_To be updated_
 
 ## Game Rules
 
@@ -184,15 +204,15 @@ WhereDid/
 
 ## Project Structure
 
-*To be updated*
+_To be updated_
 
 ## Contributing
 
-*To be updated*
+_To be updated_
 
 ## License
 
-*To be updated*
+_To be updated_
 
 ## Authors
 
@@ -201,4 +221,4 @@ WhereDid/
 
 ---
 
-*Last updated: December 8, 2025*
+_Last updated: December 8, 2025_
