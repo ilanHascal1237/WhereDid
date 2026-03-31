@@ -4,7 +4,7 @@ A daily guessing game where players test their knowledge of NBA and NFL athletes
 
 ## Overview
 
-WhereDid is inspired by [Poeltl](https://poeltl.com), a popular NBA player guessing game. Our version expands the concept by including both NBA and NFL players, offering players a broader challenge across two major professional sports leagues.
+WhereDid is inspired by the classic game of asking friends "Where did they go to college?" and testing their knowledge of athletes' backgrounds. Our version turns that never-ending rabbit hole into a structured daily guessing game, challenging players to identify NBA and NFL athletes based on strategic hints about their careers and personal details.
 
 Each day features a new mystery player that users must guess using strategic hints. The game features three difficulty levels to accommodate players of all knowledge levels.
 
