@@ -5,6 +5,14 @@ import hashlib
 import random
 import re
 
+
+class DataNotReadyError(Exception):
+    """Raised when a request can't be served because backing data (e.g.
+    player/college records) hasn't finished syncing yet. This is a transient
+    "not ready" condition, not a server bug, and is mapped to a 503 response
+    by the global exception handler in main.py."""
+
+
 # Per-difficulty rules:
 #   hints          - how many college hints are revealed
 #   max_guesses    - attempts allowed in daily mode
@@ -133,7 +141,7 @@ class GameService:
             if count:
                 break
         else:
-            raise Exception("No players available yet. Player data may still be syncing.")
+            raise DataNotReadyError("No players available yet. Player data may still be syncing.")
 
         index = (seed // len(LEAGUES)) % count
         return next(players_collection.find(query).sort("_id", 1).skip(index).limit(1))
@@ -212,8 +220,35 @@ class GameService:
         return _find_player(player_id)
 
 
+# Cached result of _college_groups(match=None) - the "all colleges" grouping
+# used by MascotService on every /game/mascot/next and /game/mascot/guess
+# request. The underlying data only changes when an ESPN sync runs, so this
+# is invalidated via invalidate_college_cache() rather than on a timer.
+_college_groups_cache: list = None
+
+
+def invalidate_college_cache() -> None:
+    """Drop the cached college groups so the next lookup re-reads Mongo.
+
+    Call this after a player sync (e.g. espn.sync_players) completes, since
+    that's the only thing that changes the data _college_groups() reflects.
+    """
+    global _college_groups_cache
+    _college_groups_cache = None
+
+
 def _college_groups(match: dict = None) -> list:
-    """One document per college, built from the players collection."""
+    """One document per college, built from the players collection.
+
+    The no-filter "all colleges" case (match=None) is cached in-process
+    since it's recomputed on every mascot-mode request; a single-college
+    lookup (match={"college_espn_id": ...}) is cheap/targeted already and
+    isn't cached.
+    """
+    global _college_groups_cache
+    if match is None and _college_groups_cache is not None:
+        return _college_groups_cache
+
     pipeline = [
         {"$match": {"college_espn_id": {"$ne": None}, **(match or {})}},
         {"$group": {
@@ -227,7 +262,11 @@ def _college_groups(match: dict = None) -> list:
             "players": {"$sum": 1},
         }},
     ]
-    return list(get_players_collection().aggregate(pipeline))
+    result = list(get_players_collection().aggregate(pipeline))
+
+    if match is None:
+        _college_groups_cache = result
+    return result
 
 
 def _mascot_clues(college: dict, difficulty: str) -> list:
@@ -257,7 +296,7 @@ class MascotService:
         fresh = [c for c in colleges if c["_id"] not in set(exclude or [])]
         pool = fresh or colleges  # allow repeats once the pool is exhausted
         if not pool:
-            raise Exception("No colleges available yet. Player data may still be syncing.")
+            raise DataNotReadyError("No colleges available yet. Player data may still be syncing.")
 
         college = random.choice(pool)
         hints = [f"{label}: {college[field]}" for field, label in _mascot_clues(college, difficulty)]

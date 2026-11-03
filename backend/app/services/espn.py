@@ -17,6 +17,7 @@ from typing import Optional
 from pymongo import UpdateOne
 
 from app.db import get_players_collection
+from app.services import invalidate_college_cache
 
 BASE_URL = "https://site.api.espn.com/apis/site/v2/sports"
 
@@ -217,6 +218,10 @@ def sync_players(leagues: Optional[list] = None, log=print) -> int:
     # Drop hand-seeded sample players now that real data is available
     removed = coll.delete_many({"source": {"$ne": "espn"}}).deleted_count
     log(f"Synced {len(players)} players from ESPN (removed {removed} sample players)")
+
+    # Mascot-mode's cached "all colleges" grouping is now stale
+    invalidate_college_cache()
+
     return len(players)
 
 
