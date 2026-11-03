@@ -15,6 +15,12 @@ interface Streak {
   lastWonDate: string | null
 }
 
+// Browser-local "today", used only as a best-effort cache-hit check on
+// mount so a returning user gets an instant resume with no network flash in
+// the common case (client and server agree on the date). It is NOT the
+// source of truth for persistence or streak logic — the backend's
+// `date` field (returned with every daily-challenge response) is, since the
+// server and client clocks can disagree across timezones/midnight.
 const todayString = () => {
   const d = new Date()
   const mm = String(d.getMonth() + 1).padStart(2, '0')
@@ -22,29 +28,46 @@ const todayString = () => {
   return `${d.getFullYear()}-${mm}-${dd}`
 }
 
-const yesterdayString = () => {
-  const d = new Date()
-  d.setDate(d.getDate() - 1)
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  const dd = String(d.getDate()).padStart(2, '0')
-  return `${d.getFullYear()}-${mm}-${dd}`
-}
-
 const dailyKey = (date: string) => `wheredid:daily:${date}`
 
+// Treat "YYYY-MM-DD" strings as plain calendar dates (no timezone attached)
+// by parsing them as UTC, so comparing two server-provided dates doesn't
+// depend on the browser's local clock or DST.
+const parseCalendarDate = (date: string) => {
+  const [y, m, d] = date.split('-').map(Number)
+  return Date.UTC(y, m - 1, d)
+}
+
+const isNextCalendarDay = (prevDate: string, nextDate: string) => {
+  const ONE_DAY_MS = 24 * 60 * 60 * 1000
+  return parseCalendarDate(nextDate) - parseCalendarDate(prevDate) === ONE_DAY_MS
+}
+
 const GamePage: React.FC<GamePageProps> = ({ onSwitchMode }) => {
+  // Best-effort guess at "today" for the synchronous cache-hit check below.
+  // Reads under this key only hit when the saved game was itself written
+  // under the server's canonical date for that day, which is what happens
+  // whenever the client and server agreed on the date at save time (the
+  // overwhelming majority of the time). A miss just falls through to a
+  // normal fetch, which then re-keys everything off the server's `date`.
   const today = todayString()
   const saved = loadJSON<GameState | null>(dailyKey(today), null)
 
   const [gameState, setGameState] = useState<GameState>(
-    saved || {
-      currentPlayer: null,
-      difficulty: loadJSON<Difficulty>('wheredid:difficulty', 'medium'),
-      guesses: [],
-      maxGuesses: 4,
-      gameStatus: 'playing',
-      hints: [],
-    }
+    saved
+      ? // Back-compat: entries saved before `date` was tracked don't have
+        // it. They were (by construction) saved under the local-today key,
+        // so that key is the best available stand-in for their canonical date.
+        { ...saved, date: saved.date || today }
+      : {
+          currentPlayer: null,
+          difficulty: loadJSON<Difficulty>('wheredid:difficulty', 'medium'),
+          guesses: [],
+          maxGuesses: 4,
+          gameStatus: 'playing',
+          hints: [],
+          date: null,
+        }
   )
   const [streak, setStreak] = useState<Streak>(
     loadJSON<Streak>('wheredid:streak', { count: 0, lastWonDate: null })
@@ -56,9 +79,12 @@ const GamePage: React.FC<GamePageProps> = ({ onSwitchMode }) => {
     if (!saved) loadDailyChallenge(gameState.difficulty)
   }, [])
 
-  // Persist progress so a refresh doesn't reset today's game
+  // Persist progress so a refresh doesn't reset today's game. Keyed by the
+  // server's canonical date (gameState.date) rather than the browser's
+  // local date, so a client/server timezone mismatch can't cause this to
+  // read back under the wrong key later.
   useEffect(() => {
-    if (gameState.currentPlayer) saveJSON(dailyKey(today), gameState)
+    if (gameState.currentPlayer) saveJSON(dailyKey(gameState.date || today), gameState)
   }, [gameState])
 
   /**
@@ -79,6 +105,9 @@ const GamePage: React.FC<GamePageProps> = ({ onSwitchMode }) => {
         guesses: [],
         gameStatus: 'playing',
         hints,
+        // Server's canonical date for this challenge — the source of truth
+        // for the storage key and streak logic below, not the client's guess.
+        date: challenge.date,
       }))
     } catch (err: any) {
       setError(
@@ -96,10 +125,16 @@ const GamePage: React.FC<GamePageProps> = ({ onSwitchMode }) => {
   }
 
   const recordWin = () => {
-    if (streak.lastWonDate === today) return
+    // gameState.date is the server's canonical date for the challenge just
+    // won; today is only a fallback for the (shouldn't-happen) case a win
+    // is recorded before any challenge has ever been loaded.
+    const wonDate = gameState.date || today
+    if (streak.lastWonDate === wonDate) return
     const next = {
-      count: streak.lastWonDate === yesterdayString() ? streak.count + 1 : 1,
-      lastWonDate: today,
+      count: streak.lastWonDate && isNextCalendarDay(streak.lastWonDate, wonDate)
+        ? streak.count + 1
+        : 1,
+      lastWonDate: wonDate,
     }
     setStreak(next)
     saveJSON('wheredid:streak', next)

@@ -21,6 +21,12 @@ export interface GameState {
   maxGuesses: number
   gameStatus: 'playing' | 'won' | 'lost'
   hints: string[]
+  // Canonical "YYYY-MM-DD" date this challenge belongs to, as returned by the
+  // backend's /game/daily-challenge `date` field. Null until a challenge has
+  // been loaded. This is the source of truth for daily persistence/streak
+  // logic — never the browser's locally-computed date, which can disagree
+  // with the server's when client and server are in different timezones.
+  date: string | null
 }
 
 export interface DailyChallenge {
