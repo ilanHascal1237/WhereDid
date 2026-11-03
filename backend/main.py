@@ -2,13 +2,28 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
+import threading
 from app.db import MongoDB
 from app.routes import game, players
+from app.services import espn
 
 load_dotenv()
 
 # Connect to MongoDB on startup
 MongoDB.connect_db()
+
+
+def _sync_in_background():
+    try:
+        espn.sync_players()
+    except Exception as e:
+        print(f"ESPN player sync failed: {e}")
+
+
+# Pull fresh rosters from ESPN when the DB is empty or stale. Runs in a
+# thread so the API is available immediately. Set AUTO_SYNC=false to skip.
+if os.getenv("AUTO_SYNC", "true").lower() != "false" and espn.needs_sync():
+    threading.Thread(target=_sync_in_background, daemon=True).start()
 
 app = FastAPI(
     title="WhereDid API",

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.db import get_players_collection
+from app.services import public_player
 from bson.objectid import ObjectId
 
 router = APIRouter(prefix="/players", tags=["players"])
@@ -74,14 +75,9 @@ async def get_player(player_id: str):
         # to guess the college. The DB still stores the college value for checking
         # guesses, but we omit it from the player payload sent to the UI.
         # Only expose non-sensitive public fields. College is intentionally omitted.
-        payload = {
-            "id": str(player["_id"]),
-            "name": player["name"],
-            "draftYear": player.get("draft_year"),
-            "imageUrl": player.get("image_url")
-        }
-
-        return payload
+        return public_player(player)
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
  

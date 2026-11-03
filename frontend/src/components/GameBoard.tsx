@@ -1,102 +1,26 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { GameState } from '../types'
-import { gameService } from '../services/gameService'
+import CollegeInput from './CollegeInput'
+import PlayerCard from './PlayerCard'
 import './GameBoard.css'
 
 interface GameBoardProps {
   gameState: GameState
   // onGuess receives the user's guessed college for the current player
   onGuess: (guessedCollege: string) => void
-  // onNewGame may accept an optional mode or date string (e.g. 'tomorrow' or '2025-12-10')
-  onNewGame: (mode?: string) => void
+  // Called from the end-of-game panel to jump to another mode
+  onSwitchMode: (mode: 'endless' | 'mascot') => void
 }
 
-const GameBoard: React.FC<GameBoardProps> = ({
-  gameState,
-  onGuess,
-  onNewGame,
-}) => {
-  const [inputValue, setInputValue] = useState('')
+const GameBoard: React.FC<GameBoardProps> = ({ gameState, onGuess, onSwitchMode }) => {
   // Hints hidden by default per game rules
   const [showHints, setShowHints] = useState(false)
-  const [displayedHints, setDisplayedHints] = useState<string[]>(gameState.hints)
-  const [suggestions, setSuggestions] = useState<string[]>([])
-  const [suggestionsVisible, setSuggestionsVisible] = useState(false)
-
-  // debounce timer id
-  let debounceTimer: number | undefined
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (inputValue.trim()) {
-      onGuess(inputValue)
-      setInputValue('')
-      setSuggestions([])
-      setSuggestionsVisible(false)
-    }
-  }
-
-  const fetchSuggestions = (q: string) => {
-    // clear any existing timer
-    window.clearTimeout(debounceTimer)
-    // debounce 250ms
-    debounceTimer = window.setTimeout(async () => {
-      if (!q || q.trim().length === 0) {
-        setSuggestions([])
-        setSuggestionsVisible(false)
-        return
-      }
-
-      try {
-        const cols = await (await import('../services/gameService')).gameService.getColleges(q)
-        setSuggestions(cols)
-        setSuggestionsVisible(cols.length > 0)
-      } catch (err) {
-        console.error('Error fetching college suggestions', err)
-        setSuggestions([])
-        setSuggestionsVisible(false)
-      }
-    }, 250)
-  }
-
-  const handleInputChange = (value: string) => {
-    setInputValue(value)
-    fetchSuggestions(value)
-  }
-
-  const handleSuggestionClick = (s: string) => {
-    setInputValue(s)
-    setSuggestions([])
-    setSuggestionsVisible(false)
-  }
-
-  // Keep displayedHints in sync when gameState.hints changes (initial load)
-  useEffect(() => {
-    setDisplayedHints(gameState.hints)
-  }, [gameState.hints])
-
-  const toggleHints = async () => {
-    // If turning hints on, fetch the full set (easy) so user sees all three college hints
-    if (!showHints) {
-      try {
-        if (gameState.currentPlayer?.id) {
-          const hints = await gameService.getHints(gameState.currentPlayer.id, 'easy')
-          setDisplayedHints(hints)
-        }
-      } catch (err) {
-        console.error('Error fetching hints:', err)
-      }
-    }
-    setShowHints((s) => !s)
-  }
+  const guessesLeft = gameState.maxGuesses - gameState.guesses.length
+  const player = gameState.currentPlayer
 
   return (
     <div className="game-board">
-      {/* Player display: show only name (team removed) */}
-      <div className="player-card">
-        <h2 className="player-name">{gameState.currentPlayer?.name}</h2>
-        {/* team removed from UI per spec */}
-      </div>
+      <PlayerCard player={player} />
 
       {/* Hints Section */}
       <div className="hints-section">
@@ -105,8 +29,8 @@ const GameBoard: React.FC<GameBoardProps> = ({
           <button
             type="button"
             className="toggle-hints-button"
-            onClick={toggleHints}
-            aria-pressed={!showHints}
+            onClick={() => setShowHints((s) => !s)}
+            aria-pressed={showHints}
           >
             {showHints ? 'Hide' : 'Show'}
           </button>
@@ -114,7 +38,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
 
         {showHints && (
           <div className="hints-list">
-            {displayedHints.map((hint, index) => (
+            {gameState.hints.map((hint, index) => (
               <div key={index} className="hint-item">
                 {hint}
               </div>
@@ -136,62 +60,31 @@ const GameBoard: React.FC<GameBoardProps> = ({
       )}
 
       {/* Game Status */}
-      {gameState.gameStatus === 'won' && (
-        <div className="status-message won">
-          <h2>🎉 You got it!</h2>
+      {gameState.gameStatus !== 'playing' && (
+        <div className={`status-message ${gameState.gameStatus}`}>
+          <h2>{gameState.gameStatus === 'won' ? '🎉 You got it!' : 'Game Over'}</h2>
+          {player?.collegeLogo && (
+            <img className="college-logo" src={player.collegeLogo} alt={player.college} />
+          )}
           <p>
-            {gameState.currentPlayer?.name} went to{' '}
-            <strong>{gameState.currentPlayer?.college || '—'}</strong>
+            {player?.name} went to <strong>{player?.college || '—'}</strong>
           </p>
-          <button onClick={() => onNewGame('tomorrow')}>Play Tomorrow's Challenge</button>
-        </div>
-      )}
-
-      {gameState.gameStatus === 'lost' && (
-        <div className="status-message lost">
-          <h2>Game Over</h2>
-          <p>
-            {gameState.currentPlayer?.name} went to{' '}
-            <strong>{gameState.currentPlayer?.college || '—'}</strong>
-          </p>
-          <button onClick={() => onNewGame('tomorrow')}>Try Tomorrow's Challenge</button>
+          <p className="come-back">Come back tomorrow for a new player.</p>
+          <div className="status-actions">
+            <button onClick={() => onSwitchMode('endless')}>Play Endless Mode</button>
+            <button onClick={() => onSwitchMode('mascot')}>Play Mascot Mode</button>
+          </div>
         </div>
       )}
 
       {/* Input Form */}
       {gameState.gameStatus === 'playing' && (
-        <form className="guess-form" onSubmit={handleSubmit}>
-          <div style={{ position: 'relative', flex: 1 }}>
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => handleInputChange(e.target.value)}
-              placeholder="Enter college name..."
-              className="guess-input"
-              disabled={gameState.gameStatus !== 'playing'}
-              autoComplete="off"
-            />
-            {suggestionsVisible && suggestions.length > 0 && (
-              <div className="suggestions-list" role="listbox">
-                {suggestions.map((s, i) => (
-                  <div
-                    key={i}
-                    role="option"
-                    tabIndex={0}
-                    className="suggestion-item"
-                    onMouseDown={(e) => e.preventDefault()} /* prevent input blur */
-                    onClick={() => handleSuggestionClick(s)}
-                  >
-                    {s}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          <button type="submit" className="guess-button">
-            Guess
-          </button>
-        </form>
+        <>
+          <p className="guesses-left">
+            {guessesLeft} guess{guessesLeft === 1 ? '' : 'es'} left
+          </p>
+          <CollegeInput onSubmit={onGuess} />
+        </>
       )}
     </div>
   )

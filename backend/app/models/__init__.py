@@ -23,6 +23,11 @@ class GameGuess(BaseModel):
     guessed_college: str
     difficulty: str
 
+class MascotGuess(BaseModel):
+    college_id: str
+    guessed_college: str
+    difficulty: str
+
 class GuessResponse(BaseModel):
     correct: bool
     message: str
