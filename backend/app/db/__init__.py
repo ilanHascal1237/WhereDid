@@ -38,7 +38,3 @@ def get_players_collection():
 def get_daily_challenges_collection():
     db = MongoDB.get_db()
     return db["daily_challenges"]
-
-def get_game_sessions_collection():
-    db = MongoDB.get_db()
-    return db["game_sessions"]
