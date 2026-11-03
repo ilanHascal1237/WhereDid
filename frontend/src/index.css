@@ -1,46 +1,80 @@
 :root {
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color-scheme: dark;
+
+  /* Field (deep pine, stadium-at-night) */
+  --field: #142b22;
+  --field-dark: #0c1c15;
+  --field-line: rgba(244, 234, 216, 0.05);
+
+  /* Ticket / card surface */
+  --cream: #f4ecd8;
+  --cream-dim: #e7dabd;
+  --ink: #1b2a21;
+  --ink-soft: rgba(27, 42, 33, 0.65);
+
+  /* Accents */
+  --gold: #e3a430;
+  --gold-bright: #f3c05c;
+  --gold-ink: #3a2609;
+  --brick: #c1453a;
+  --brick-deep: #8f2e26;
+  --grass: #3f9d5d;
+  --grass-deep: #296b3f;
+
+  --shadow-deep: rgba(6, 12, 9, 0.55);
+
+  --font-display: 'Fraunces', 'Iowan Old Style', serif;
+  --font-body: 'Archivo', 'Helvetica Neue', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+  background-color: var(--field);
+  color: var(--cream);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
 }
 
 a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+  font-weight: 600;
+  color: var(--gold-bright);
+  text-decoration: underline;
+  text-decoration-color: rgba(243, 192, 92, 0.35);
+  text-underline-offset: 3px;
 }
 a:hover {
-  color: #535bf2;
+  color: var(--gold);
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
+  border-radius: 10px;
+  border: none;
+  padding: 0.65em 1.3em;
   font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  font-weight: 700;
+  font-family: var(--font-body);
+  letter-spacing: 0.02em;
+  background-color: var(--gold);
+  color: var(--gold-ink);
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18);
 }
 button:hover {
-  border-color: #646cff;
+  background-color: var(--gold-bright);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
 }
-button:focus,
+button:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+}
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+  outline: 3px solid var(--gold-bright);
+  outline-offset: 2px;
 }

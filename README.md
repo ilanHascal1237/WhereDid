@@ -10,31 +10,60 @@ Each day features a new mystery player that users must guess using strategic hin
 
 ## Screenshots
 
-![Rogers](images/rogers.png)
+| Daily | Daily — solved |
+| --- | --- |
+| ![Daily mode](images/daily-mode.png) | ![Daily mode, won](images/daily-mode-won.png) |
 
-![Jjettas](images/jjettas.png)
+| Endless | Mascot |
+| --- | --- |
+| ![Endless mode](images/endless-mode.png) | ![Mascot mode](images/mascot-mode.png) |
+
+Earlier versions of the UI are kept in [images/archive](images/archive) for reference.
 
 ## Features
 
-### Core Gameplay
+### Game Modes
 
-- **Daily Mystery Player**: A new player is featured each day
-- **Multi-League Support**: Players from both NBA and NFL
-- **Multiple Difficulty Modes**:
-  - **Easy Mode**: More generous hints and clues
-  - **Medium Mode**: Balanced difficulty with moderate hints
-  - **Hard Mode**: Challenging mode with minimal hints
-- **Limited Guesses**: Players have a set number of attempts to guess correctly
+- **Daily**: One mystery player per day, the same for everyone. Guess where they went to college before you run out of guesses. Wins build a daily streak.
+- **Endless**: Rapid-fire. Guess the college for as many random players as you can, with one guess per player and 3 lives. Filter by NBA, NFL or both. Your best score is saved for each league and difficulty.
+- **Mascot**: You're shown a college mascot and name the school. Same 3-lives format. Many mascots are shared (there are a lot of Bulldogs), so any school that fits every clue shown counts as correct.
+
+### Difficulty
+
+Every mode has Easy, Medium and Hard:
+
+| Mode | Easy | Medium | Hard |
+| --- | --- | --- | --- |
+| Daily | 3 hints, 6 guesses | 2 hints, 4 guesses | 1 hint, 3 guesses |
+| Endless | Veterans (8+ seasons), 3 hints | 4+ seasons, 2 hints | Anyone, 1 hint |
+| Mascot | Big programs, conference + colors | 5+ pros, conference | Any school, mascot only |
+
+Player hints are about the college: colors, then conference, then mascot.
 
 ### Planned Enhancements
 
-- Score tracking and statistics
 - Leaderboards
 - Social sharing of results
-- Streak tracking
 - Player filtering by team, position, era, etc.
 - Additional sports integration
-- Mobile responsive design optimization
+
+## Data Source
+
+Player data comes from ESPN's public site API (`site.api.espn.com`). No API key is needed.
+
+- Every NBA and NFL team roster is fetched (practice squads are skipped). Players without a college on record are excluded.
+- Each college is enriched with its colors and conference from ESPN's college football / men's basketball team endpoints. NBA players get the basketball conference and NFL players the football conference.
+- Players are upserted into MongoDB keyed by ESPN id (about 2,600 players from about 260 colleges).
+
+The backend syncs automatically on startup when the database is empty or the data is more than 7 days old. This runs in the background and takes about 15 seconds. To sync manually:
+
+```bash
+cd backend
+python ./scripts/sync_players.py        # both leagues
+python ./scripts/sync_players.py NBA    # one league
+```
+
+Set `AUTO_SYNC=false` in `backend/.env` to turn off the startup sync. `scripts/seed_players.py` still inserts a small offline sample set. The ESPN sync removes those sample players once real data is loaded.
 
 ## Tech Stack
 
@@ -52,159 +81,94 @@ Each day features a new mystery player that users must guess using strategic hin
 - Node.js 18+ (for frontend)
 - Python 3.10+ (for backend)
 - MongoDB 5.0+ (local or Atlas)
-- npm or yarn (for package management)
+
+### Backend Setup
+
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env            # then set MONGODB_URL if not using local MongoDB
+```
+
+### Frontend Setup
+
+```bash
+cd frontend
+npm install
+```
+
+Optionally create `frontend/.env.local` with `VITE_API_URL=http://127.0.0.1:8000` to point the app at a different API.
 
 ### Running the Project
 
-#### Start MongoDB
+1. Start MongoDB (`mongod`, or use an Atlas connection string in `backend/.env`).
+2. Start the backend from `backend/`:
+   ```bash
+   uvicorn main:app --reload --host 0.0.0.0 --port 8000
+   ```
+   The API is at `http://localhost:8000`, with docs at `http://localhost:8000/docs`. On first start it pulls players from ESPN in the background.
+3. Start the frontend from `frontend/`:
+   ```bash
+   npm run dev
+   ```
+   The app is at `http://localhost:5173`.
 
-Make sure MongoDB is running:
+### Build for Production
 
 ```bash
-# Local MongoDB (if installed)
-mongod
-
-# Or use MongoDB Atlas (update .env with your connection string)
+cd frontend && npm run build
+cd backend && gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app
 ```
 
-#### Start Backend
+### API Overview
 
-From the `backend` directory:
-
-```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
-
-The API will be available at `http://localhost:8000`
-API documentation: `http://localhost:8000/docs`
-
-#### Start Frontend
-
-From the `frontend` directory:
-
-```bash
-npm run dev
-```
-
-The application will be available at `http://localhost:5173`
-
-#### Build for Production
-
-**Frontend**:
-
-```bash
-npm run build
-```
-
-**Backend**:
-
-````bash
-# Run with gunicorn or similar in production
-gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app
-```tup
-
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-````
-
-2. Create a virtual environment:
-
-   ```bash
-   python -m venv venv
-   ```
-
-3. Activate the virtual environment:
-
-   ```bash
-   # On Windows
-   venv\Scripts\activate
-
-   # On macOS/Linux
-   source venv/bin/activate
-   ```
-
-4. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-## Project Structure
-
-````
-WhereDid/
-├── frontend/                 # React + TypeScript frontend
-│   ├── src/
-│   │   ├── components/      # React components
-│   │   ├── pages/           # Page components
-│   │   ├── services/        # API service calls
-│   │   ├── types/           # TypeScript type definitions
-│   │   ├── styles/          # CSS files
-│   │   ├── App.tsx
-│   │   └── main.tsx
-│   ├── index.html
-│   ├── package.json
-│   ├── tsconfig.json
-│   ├── vite.config.ts
-│   └── .eslintrc.cjs
-│
-├── backend/                  # FastAPI backend
-│   ├── app/
-│   │   ├── models/          # Pydantic models
-│   │   ├── routes/          # API route handlers
-│   │   ├── services/        # Business logic
-│   │   └── db/              # Database connections
-│   ├── main.py              # FastAPI app entry point
-│   ├── requirements.txt
-│   ├── .env.example
-│   └── .gitignore
-│
-├── README.md
-└── .gitignore
-```vironment variables:
-   ```bash
-   cp .env.example .env
-````
-
-Update `.env` with your MongoDB connection string and other settings.
-
-#### Frontend Setup
-
-1. Navigate to the frontend directory:
-
-   ```bash
-   cd frontend
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-3. Create a `.env.local` file (optional):
-   ```bash
-   VITE_API_URL=http://localhost:8000/api
-   ```
-
-### Running the Project
-
-_To be updated_
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /game/daily-challenge?difficulty=` | Today's player (stable for the whole day) |
+| `GET /game/hints/{player_id}?difficulty=` | College hints for a player |
+| `POST /game/guess` | Check a college guess |
+| `GET /game/reveal/{player_id}` | Reveal the answer after a round ends |
+| `GET /game/endless/next?league=&difficulty=&exclude=` | Random player for Endless mode |
+| `GET /game/mascot/next?difficulty=&exclude=` | Random mascot for Mascot mode |
+| `POST /game/mascot/guess` | Check a mascot guess |
+| `GET /players/colleges?q=` | College name autocomplete |
 
 ## Game Rules
 
-1. A random player from the NBA or NFL is selected as the daily mystery player
-2. Players have a limited number of guesses to identify the correct player
-3. Hints are provided based on difficulty level:
-   - **Easy**: Basic information (team, position, jersey number, draft year)
-   - **Medium**: Standard hints (team, position, statistics)
-   - **Hard**: Minimal hints (limited identifying information)
-4. Correct guess reveals the player's full profile and statistics
-5. Results can be shared or tracked for daily streaks
+1. Each day a random established NBA or NFL player is chosen as the daily mystery player.
+2. You get a limited number of guesses (based on difficulty) to name the college they attended.
+3. Hints are about the college: colors, conference and mascot. Harder modes show fewer.
+4. Common variants are accepted: "University of Michigan", "Michigan" and "MICH" all count.
+5. When the round ends, the college and its logo are revealed. Progress and streaks are saved in your browser.
 
 ## Project Structure
 
-_To be updated_
+```
+WhereDid/
+├── frontend/src/
+│   ├── components/   # GameBoard, StreakGame (endless/mascot loop), CollegeInput, PlayerCard, OptionPicker
+│   ├── pages/        # GamePage (daily), EndlessPage, MascotPage
+│   ├── services/     # API client + localStorage helpers
+│   └── types/
+└── backend/
+    ├── app/
+    │   ├── routes/       # /game and /players endpoints
+    │   ├── services/     # game logic; espn.py = ESPN ingestion
+    │   ├── models/
+    │   └── db/
+    ├── scripts/          # sync_players.py (ESPN), seed_players.py (offline sample)
+    └── main.py
+```
+
+## Documentation
+
+Architecture, state machine and sequence diagrams (Mermaid) live in [docs/](docs/):
+
+- [docs/architecture.md](docs/architecture.md)
+- [docs/state-diagrams.md](docs/state-diagrams.md)
+- [docs/sequence-diagrams.md](docs/sequence-diagrams.md)
 
 ## Contributing
 
@@ -221,4 +185,4 @@ _To be updated_
 
 ---
 
-_Last updated: March 30, 2026_
+_Last updated: November 3, 2026_

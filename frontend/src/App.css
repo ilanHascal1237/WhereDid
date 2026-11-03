@@ -2,7 +2,172 @@
   width: 100%;
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
+  padding: 36px 0 48px;
+  box-sizing: border-box;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      var(--field-line) 0px,
+      var(--field-line) 1px,
+      transparent 1px,
+      transparent 64px
+    ),
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(227, 164, 48, 0.12), transparent),
+    linear-gradient(180deg, var(--field) 0%, var(--field-dark) 100%);
+}
+
+.app-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+  animation: dropIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.app-header h1 {
+  margin: 0;
+  color: var(--cream);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 3em;
+  letter-spacing: 0.01em;
+  text-shadow: 0 3px 0 var(--field-dark), 0 10px 24px var(--shadow-deep);
+  position: relative;
+}
+
+.app-header h1::after {
+  content: '';
+  display: block;
+  width: 56px;
+  height: 4px;
+  margin: 10px auto 0;
+  background: var(--gold);
+  border-radius: 2px;
+}
+
+.app-header .option-picker {
+  animation: dropIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both;
+}
+
+.app-header .option-button {
+  background: rgba(244, 234, 216, 0.08);
+  color: var(--cream-dim);
+  box-shadow: none;
+}
+
+.app-header .option-button:hover {
+  background: rgba(244, 234, 216, 0.16);
+  color: var(--cream);
+}
+
+.app-header .option-button.selected {
+  background: var(--gold);
+  color: var(--gold-ink);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
+}
+
+.option-picker {
+  display: flex;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.option-button {
+  background: var(--cream-dim);
+  color: var(--ink-soft);
+  border: none;
+  border-radius: 999px;
+  padding: 8px 20px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: inset 0 0 0 1px rgba(27, 42, 33, 0.08);
+  transition: transform 0.15s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.option-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.option-button.selected {
+  background: var(--ink);
+  color: var(--gold-bright);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18);
+}
+
+.option-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+}
+
+.settings-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: riseIn 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.mode-intro {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.1em;
+  color: var(--ink);
+  opacity: 0.85;
+}
+
+.streak {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-style: normal;
+  color: var(--brick-deep);
+  display: inline-block;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.settings-help {
+  margin: 0;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 0.82em;
+}
+
+@keyframes dropIn {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
 }
