@@ -18,6 +18,11 @@ const api = axios.create({
   },
 })
 
+// The full college list is small (~260 schools) and only changes on the
+// weekly ESPN sync, so it's fetched once per session and filtered
+// client-side instead of hitting the backend on every keystroke.
+let allCollegesPromise: Promise<string[]> | null = null
+
 export const gameService = {
   /**
    * Get the daily challenge player (today unless a YYYY-MM-DD date is given)
@@ -133,5 +138,23 @@ export const gameService = {
       params: query ? { q: query } : {},
     })
     return response.data.colleges || []
+  },
+
+  /**
+   * Full list of colleges, fetched once and cached in memory for the
+   * session so type-ahead can filter client-side with no per-keystroke
+   * requests. Retries on next call if the first attempt failed.
+   */
+  getAllColleges: (): Promise<string[]> => {
+    if (!allCollegesPromise) {
+      allCollegesPromise = api
+        .get('/players/colleges')
+        .then((response) => response.data.colleges || [])
+        .catch((err) => {
+          allCollegesPromise = null
+          throw err
+        })
+    }
+    return allCollegesPromise
   },
 }

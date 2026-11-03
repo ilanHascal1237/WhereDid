@@ -10,7 +10,9 @@ interface CollegeInputProps {
 }
 
 /**
- * College name input with type-ahead suggestions from the backend.
+ * College name input with type-ahead suggestions. The full college list is
+ * fetched once (cached in gameService) and filtered client-side, so typing
+ * never hits the network.
  */
 const CollegeInput: React.FC<CollegeInputProps> = ({
   onSubmit,
@@ -20,36 +22,25 @@ const CollegeInput: React.FC<CollegeInputProps> = ({
 }) => {
   const [inputValue, setInputValue] = useState('')
   const [suggestions, setSuggestions] = useState<string[]>([])
-  const debounceTimer = useRef<number | undefined>(undefined)
+  const allColleges = useRef<string[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!disabled) inputRef.current?.focus()
   }, [disabled])
 
-  useEffect(() => () => window.clearTimeout(debounceTimer.current), [])
-
-  const fetchSuggestions = (q: string) => {
-    window.clearTimeout(debounceTimer.current)
-    // debounce 250ms
-    debounceTimer.current = window.setTimeout(async () => {
-      if (!q.trim()) {
-        setSuggestions([])
-        return
-      }
-      try {
-        setSuggestions((await gameService.getColleges(q)).slice(0, 8))
-      } catch (err) {
-        console.error('Error fetching college suggestions', err)
-        setSuggestions([])
-      }
-    }, 250)
-  }
+  useEffect(() => {
+    gameService
+      .getAllColleges()
+      .then((colleges) => {
+        allColleges.current = colleges
+      })
+      .catch((err) => console.error('Error loading college list', err))
+  }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (inputValue.trim()) {
-      window.clearTimeout(debounceTimer.current)
       onSubmit(inputValue.trim())
       setInputValue('')
       setSuggestions([])
@@ -58,7 +49,14 @@ const CollegeInput: React.FC<CollegeInputProps> = ({
 
   const handleInputChange = (value: string) => {
     setInputValue(value)
-    fetchSuggestions(value)
+    const q = value.trim().toLowerCase()
+    if (!q) {
+      setSuggestions([])
+      return
+    }
+    setSuggestions(
+      allColleges.current.filter((c) => c.toLowerCase().includes(q)).slice(0, 8)
+    )
   }
 
   const handleSuggestionClick = (s: string) => {
