@@ -169,6 +169,7 @@ Architecture, state machine and sequence diagrams (Mermaid) live in [docs/](docs
 - [docs/architecture.md](docs/architecture.md)
 - [docs/state-diagrams.md](docs/state-diagrams.md)
 - [docs/sequence-diagrams.md](docs/sequence-diagrams.md)
+- [docs/hosting.md](docs/hosting.md): hosting plan (Cloudflare Pages + Railway + MongoDB Atlas)
 
 ## Contributing
 
