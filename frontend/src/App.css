@@ -140,6 +140,38 @@
   font-size: 0.82em;
 }
 
+/* Phones: smaller title and pickers so the game card starts higher. */
+@media (max-width: 480px) {
+  .app {
+    padding: 16px 0 32px;
+  }
+
+  .app-header {
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .app-header h1 {
+    font-size: 2.2em;
+  }
+
+  .app-header h1::after {
+    margin-top: 6px;
+  }
+
+  .option-button {
+    padding: 8px 14px;
+  }
+
+  .mode-intro {
+    font-size: 1em;
+  }
+
+  .settings-panel {
+    gap: 12px;
+  }
+}
+
 @keyframes dropIn {
   from {
     opacity: 0;

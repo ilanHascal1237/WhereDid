@@ -9,6 +9,11 @@ interface CollegeInputProps {
   extraAction?: React.ReactNode
 }
 
+// Phones and tablets: the on-screen keyboard covers everything below the
+// input, so suggestions open upward (see GameBoard.css) and we show fewer.
+const isTouch = () =>
+  typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
+
 /**
  * College name input with type-ahead suggestions. The full college list is
  * fetched once (cached in gameService) and filtered client-side, so typing
@@ -25,8 +30,10 @@ const CollegeInput: React.FC<CollegeInputProps> = ({
   const allColleges = useRef<string[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
 
+  // Autofocus on desktop only: on phones it would pop the keyboard over the
+  // player card before the user has even looked at it.
   useEffect(() => {
-    if (!disabled) inputRef.current?.focus()
+    if (!disabled && !isTouch()) inputRef.current?.focus()
   }, [disabled])
 
   useEffect(() => {
@@ -55,7 +62,9 @@ const CollegeInput: React.FC<CollegeInputProps> = ({
       return
     }
     setSuggestions(
-      allColleges.current.filter((c) => c.toLowerCase().includes(q)).slice(0, 8)
+      allColleges.current
+        .filter((c) => c.toLowerCase().includes(q))
+        .slice(0, isTouch() ? 5 : 8)
     )
   }
 
@@ -73,10 +82,18 @@ const CollegeInput: React.FC<CollegeInputProps> = ({
           type="text"
           value={inputValue}
           onChange={(e) => handleInputChange(e.target.value)}
-          placeholder="Enter college name..."
+          // No "name" in the placeholder/name: iOS Safari reads it as a
+          // contact field and shows "AutoFill Contact" despite autoComplete.
+          placeholder="Type a college…"
+          name="college-guess"
           className="guess-input"
           disabled={disabled}
           autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="none"
+          spellCheck={false}
+          enterKeyHint="go"
+          aria-label="College guess"
         />
         {suggestions.length > 0 && (
           <div className="suggestions-list" role="listbox">

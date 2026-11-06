@@ -86,6 +86,64 @@
   background: rgba(227, 164, 48, 0.16);
 }
 
+/* Touch devices: the keyboard covers everything below the input, so the list
+   opens upward over the player card, best match closest to the input, with
+   44px tap targets. */
+@media (pointer: coarse) {
+  .suggestions-list {
+    bottom: 100%;
+    margin: 0 0 8px;
+    max-height: 240px;
+    display: flex;
+    flex-direction: column-reverse;
+    box-shadow: 0 -10px 24px rgba(0, 0, 0, 0.18);
+  }
+
+  .suggestion-item {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+}
+
+/* Phones: tighten spacing so the guess input sits higher on screen. */
+@media (max-width: 480px) {
+  .game-board {
+    gap: 16px;
+  }
+
+  .hints-section,
+  .guesses-section {
+    padding: 14px;
+  }
+
+  .player-headshot {
+    width: 132px;
+    height: 96px;
+  }
+
+  .player-name {
+    font-size: 1.3em;
+  }
+
+  .guess-form {
+    gap: 8px;
+  }
+
+  .guess-button {
+    padding: 13px 18px;
+  }
+
+  .skip-button {
+    padding: 13px 14px;
+  }
+
+  .status-message {
+    padding: 18px 14px;
+  }
+}
+
 .guesses-list {
   list-style: none;
   padding: 0;

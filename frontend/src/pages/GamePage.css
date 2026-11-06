@@ -74,6 +74,26 @@
   margin-top: 20px;
 }
 
+/* Phones: less padding around the card so content gets the width. */
+@media (max-width: 480px) {
+  .game-page {
+    padding: 0 12px;
+  }
+
+  .game-container {
+    padding: 24px 16px;
+    gap: 16px;
+  }
+
+  .game-container::before {
+    inset: 6px;
+  }
+
+  .game-container h1 {
+    font-size: 1.7em;
+  }
+}
+
 @keyframes cardIn {
   from {
     opacity: 0;
